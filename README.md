@@ -408,16 +408,18 @@ npm test
 Individual tests:
 
 ```bash
-npm run test:signatures       # Thinking signatures
-npm run test:multiturn        # Multi-turn with tools
-npm run test:streaming        # Streaming SSE events
-npm run test:interleaved      # Interleaved thinking
-npm run test:images           # Image processing
-npm run test:caching          # Prompt caching
+npm run test:model-aliases  # Model alias resolution (no server required)
+npm run test:opus-45        # Claude Opus 4.5 via OpenAI API
 npm run test:chat-completions # OpenAI Chat Completions API
+npm run test:signatures     # Thinking signatures
+npm run test:multiturn      # Multi-turn with tools
+npm run test:streaming      # Streaming SSE events
+npm run test:interleaved    # Interleaved thinking
+npm run test:images         # Image processing
+npm run test:caching        # Prompt caching
 ```
 
-> **Note:** Tests require at least one account to be configured (via `npm run accounts:add` or Antigravity app).
+> **Note:** Most tests require at least one account to be configured (via `npm run accounts:add` or Antigravity app). The `test:model-aliases` test can run without a server.
 
 ---
 
