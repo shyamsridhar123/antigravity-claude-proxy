@@ -177,7 +177,7 @@ async function runTests() {
 
     try {
         const response = await chatCompletionsRequest({
-            model: 'gpt-4',  // Maps to opus-4-5-20251101
+            model: 'gpt-4',  // Maps to claude-opus-4-5-20251101
             messages: [
                 { 
                     role: 'user', 
@@ -219,7 +219,7 @@ async function runTests() {
 
     try {
         const response = await chatCompletionsRequest({
-            model: 'gpt-4o',  // Also maps to opus-4-5-20251101
+            model: 'gpt-4o',  // Also maps to claude-opus-4-5-20251101
             messages: [
                 { role: 'system', content: 'You are a helpful assistant. Be concise.' },
                 { role: 'user', content: 'What is AI?' }
