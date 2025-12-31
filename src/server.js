@@ -11,6 +11,12 @@ import { forceRefresh } from './token-extractor.js';
 import { REQUEST_BODY_LIMIT } from './constants.js';
 import { AccountManager } from './account-manager.js';
 import { formatDuration } from './utils/helpers.js';
+import {
+    convertOpenAIToAnthropic,
+    convertAnthropicToOpenAI,
+    convertAnthropicStreamToOpenAI,
+    convertAnthropicErrorToOpenAI
+} from './format/openai-converter.js';
 
 const app = express();
 
@@ -391,6 +397,119 @@ app.post('/v1/messages/count_tokens', (req, res) => {
             message: 'Token counting is not implemented. Use /v1/messages with max_tokens or configure your client to skip token counting.'
         }
     });
+});
+
+/**
+ * OpenAI Chat Completions endpoint - GitHub Copilot compatible
+ * Converts OpenAI format to Anthropic format and back
+ */
+app.post('/v1/chat/completions', async (req, res) => {
+    try {
+        // Ensure account manager is initialized
+        await ensureInitialized();
+
+        // Optimistic Retry: If ALL accounts are rate-limited, reset them to force a fresh check.
+        if (accountManager.isAllRateLimited()) {
+            console.log('[Server] All accounts rate-limited. Resetting state for optimistic retry.');
+            accountManager.resetAllRateLimits();
+        }
+
+        console.log(`[API] OpenAI Chat Completions request for model: ${req.body.model}, stream: ${!!req.body.stream}`);
+
+        // Convert OpenAI request to Anthropic format
+        let anthropicRequest;
+        try {
+            anthropicRequest = convertOpenAIToAnthropic(req.body);
+        } catch (conversionError) {
+            console.error('[API] Error converting OpenAI request:', conversionError);
+            return res.status(400).json(convertAnthropicErrorToOpenAI({
+                type: 'invalid_request_error',
+                message: `Invalid request format: ${conversionError.message}`
+            }));
+        }
+
+        const { stream } = req.body;
+        const originalModel = req.body.model || 'gpt-4';
+
+        if (stream) {
+            // Handle streaming response
+            res.setHeader('Content-Type', 'text/event-stream');
+            res.setHeader('Cache-Control', 'no-cache');
+            res.setHeader('Connection', 'keep-alive');
+            res.setHeader('X-Accel-Buffering', 'no');
+            res.flushHeaders();
+
+            try {
+                // Use the streaming generator with account manager
+                for await (const event of sendMessageStream(anthropicRequest, accountManager)) {
+                    // Convert Anthropic event to OpenAI format
+                    const openaiChunk = convertAnthropicStreamToOpenAI(event, originalModel);
+                    
+                    if (openaiChunk) {
+                        res.write(`data: ${JSON.stringify(openaiChunk)}\n\n`);
+                        if (res.flush) res.flush();
+                    }
+                }
+                
+                // Send [DONE] message to signal end of stream
+                res.write('data: [DONE]\n\n');
+                res.end();
+
+            } catch (streamError) {
+                console.error('[API] Stream error:', streamError);
+                const errorResponse = convertAnthropicErrorToOpenAI({
+                    type: 'api_error',
+                    message: streamError.message
+                });
+                res.write(`data: ${JSON.stringify(errorResponse)}\n\n`);
+                res.end();
+            }
+
+        } else {
+            // Handle non-streaming response
+            const anthropicResponse = await sendMessage(anthropicRequest, accountManager);
+            
+            // Convert Anthropic response to OpenAI format
+            const openaiResponse = convertAnthropicToOpenAI(anthropicResponse, originalModel);
+            res.json(openaiResponse);
+        }
+
+    } catch (error) {
+        console.error('[API] Error in chat completions:', error);
+
+        let { errorType, statusCode, errorMessage } = parseError(error);
+
+        // For auth errors, try to refresh token
+        if (errorType === 'authentication_error') {
+            console.log('[API] Token might be expired, attempting refresh...');
+            try {
+                accountManager.clearProjectCache();
+                accountManager.clearTokenCache();
+                await forceRefresh();
+                errorMessage = 'Token was expired and has been refreshed. Please retry your request.';
+            } catch (refreshError) {
+                errorMessage = 'Could not refresh token. Make sure Antigravity is running.';
+            }
+        }
+
+        console.log(`[API] Returning error response: ${statusCode} ${errorType} - ${errorMessage}`);
+
+        // Check if headers have already been sent (for streaming that failed mid-way)
+        if (res.headersSent) {
+            console.log('[API] Headers already sent, writing error as SSE event');
+            const errorResponse = convertAnthropicErrorToOpenAI({
+                type: errorType,
+                message: errorMessage
+            });
+            res.write(`data: ${JSON.stringify(errorResponse)}\n\n`);
+            res.end();
+        } else {
+            res.status(statusCode).json(convertAnthropicErrorToOpenAI({
+                type: errorType,
+                message: errorMessage
+            }));
+        }
+    }
 });
 
 /**
