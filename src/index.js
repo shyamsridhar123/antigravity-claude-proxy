@@ -17,16 +17,22 @@ app.listen(PORT, () => {
 ║  Server running at: http://localhost:${PORT}                   ║
 ║                                                              ║
 ║  Endpoints:                                                  ║
-║    POST /v1/messages  - Anthropic Messages API               ║
-║    GET  /v1/models    - List available models                ║
-║    GET  /health       - Health check                         ║
-║    GET  /account-limits - Account status & quotas              ║
-║    POST /refresh-token - Force token refresh                 ║
+║    POST /v1/messages         - Anthropic Messages API        ║
+║    POST /v1/chat/completions - OpenAI Chat Completions API   ║
+║                                 (GitHub Copilot compatible)  ║
+║    GET  /v1/models           - List available models         ║
+║    GET  /health              - Health check                  ║
+║    GET  /account-limits      - Account status & quotas       ║
+║    POST /refresh-token       - Force token refresh           ║
 ║                                                              ║
 ║  Usage with Claude Code:                                     ║
 ║    export ANTHROPIC_BASE_URL=http://localhost:${PORT}          ║
 ║    export ANTHROPIC_API_KEY=dummy                            ║
 ║    claude                                                    ║
+║                                                              ║
+║  Usage with GitHub Copilot-compatible tools:                 ║
+║    export OPENAI_BASE_URL=http://localhost:${PORT}/v1          ║
+║    export OPENAI_API_KEY=dummy                               ║
 ║                                                              ║
 ║  Add Google accounts:                                        ║
 ║    npm run accounts                                          ║

@@ -6,25 +6,30 @@
 
 <a href="https://buymeacoffee.com/badrinarayanans" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="50"></a>
 
-A proxy server that exposes an **Anthropic-compatible API** backed by **Antigravity's Cloud Code**, letting you use Claude and Gemini models with **Claude Code CLI**.
+A proxy server that exposes **Anthropic-compatible** and **OpenAI-compatible** APIs backed by **Antigravity's Cloud Code**, letting you use Claude and Gemini models with **Claude Code CLI** and **GitHub Copilot-compatible tools**.
 
 ![Antigravity Claude Proxy Banner](images/banner.png)
 
 ## How It Works
 
 ```
-┌──────────────────┐     ┌─────────────────────┐     ┌────────────────────────────┐
-│   Claude Code    │────▶│  This Proxy Server  │────▶│  Antigravity Cloud Code    │
-│   (Anthropic     │     │  (Anthropic → Google│     │  (daily-cloudcode-pa.      │
-│    API format)   │     │   Generative AI)    │     │   sandbox.googleapis.com)  │
-└──────────────────┘     └─────────────────────┘     └────────────────────────────┘
+┌──────────────────────┐     ┌─────────────────────┐     ┌────────────────────────────┐
+│   Claude Code /      │────▶│  This Proxy Server  │────▶│  Antigravity Cloud Code    │
+│   Copilot Tools      │     │  (Anthropic/OpenAI  │     │  (daily-cloudcode-pa.      │
+│   (API format)       │     │   → Google Gen AI)  │     │   sandbox.googleapis.com)  │
+└──────────────────────┘     └─────────────────────┘     └────────────────────────────┘
 ```
 
-1. Receives requests in **Anthropic Messages API format**
+**Supports two API formats:**
+1. **Anthropic Messages API** (`/v1/messages`) - For Claude Code CLI
+2. **OpenAI Chat Completions API** (`/v1/chat/completions`) - For GitHub Copilot-compatible tools
+
+**Request flow:**
+1. Receives requests in **Anthropic or OpenAI format**
 2. Uses OAuth tokens from added Google accounts (or Antigravity's local database)
 3. Transforms to **Google Generative AI format** with Cloud Code wrapping
 4. Sends to Antigravity's Cloud Code API
-5. Converts responses back to **Anthropic format** with full thinking/streaming support
+5. Converts responses back to **original format** with full thinking/streaming support
 
 ## Prerequisites
 
@@ -197,6 +202,109 @@ setx ANTHROPIC_API_KEY "test"
 
 Restart your terminal for changes to take effect.
 
+---
+
+## Using with GitHub Copilot-Compatible Tools
+
+The proxy also exposes an **OpenAI-compatible `/v1/chat/completions` endpoint**, making it work with any tool that expects the OpenAI Chat Completions API format (like GitHub Copilot proxies, LangChain, etc.).
+
+### Configuration
+
+Set the OpenAI base URL environment variable:
+
+**macOS / Linux:**
+
+```bash
+echo 'export OPENAI_BASE_URL="http://localhost:8080/v1"' >> ~/.zshrc
+echo 'export OPENAI_API_KEY="dummy"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+> For Bash users, replace `~/.zshrc` with `~/.bashrc`
+
+**Windows (PowerShell):**
+
+```powershell
+Add-Content $PROFILE "`n`$env:OPENAI_BASE_URL = 'http://localhost:8080/v1'"
+Add-Content $PROFILE "`$env:OPENAI_API_KEY = 'dummy'"
+. $PROFILE
+```
+
+**Windows (Command Prompt):**
+
+```cmd
+setx OPENAI_BASE_URL "http://localhost:8080/v1"
+setx OPENAI_API_KEY "dummy"
+```
+
+### Example Usage
+
+**Python with OpenAI SDK:**
+
+```python
+import openai
+
+client = openai.OpenAI(
+    base_url="http://localhost:8080/v1",
+    api_key="dummy"  # Not validated, any value works
+)
+
+response = client.chat.completions.create(
+    model="gpt-4",  # Maps to claude-opus-4-5-thinking
+    messages=[
+        {"role": "user", "content": "Hello!"}
+    ]
+)
+
+print(response.choices[0].message.content)
+```
+
+**cURL:**
+
+```bash
+curl http://localhost:8080/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer dummy" \
+  -d '{
+    "model": "gpt-4",
+    "messages": [{"role": "user", "content": "Hello!"}],
+    "max_tokens": 100
+  }'
+```
+
+### Model Mappings
+
+OpenAI model names are automatically mapped to Claude/Gemini models:
+
+| OpenAI Model | Maps To |
+|--------------|---------|
+| `gpt-4`, `gpt-4-turbo`, `gpt-4o` | `claude-opus-4-5-thinking` |
+| `gpt-3.5-turbo` | `claude-sonnet-4-5-thinking` |
+| `gpt-4o-mini` | `claude-sonnet-4-5` |
+| `gemini-pro` | `gemini-3-pro-high` |
+| `gemini-flash` | `gemini-3-flash` |
+
+You can also use the actual model names directly (e.g., `claude-sonnet-4-5-thinking`).
+
+### Demo
+
+Run the included demo script to see the proxy in action:
+
+```bash
+# Start the proxy server
+npm start
+
+# In another terminal, run the demo
+node demo-copilot-proxy.js
+```
+
+The demo shows:
+1. Simple non-streaming completion
+2. Streaming completion with real-time output
+3. Function/tool calling
+
+---
+
 ### Run Claude Code
 
 ```bash
@@ -257,7 +365,8 @@ curl "http://localhost:8080/account-limits?format=table"
 |----------|--------|-------------|
 | `/health` | GET | Health check |
 | `/account-limits` | GET | Account status and quota limits (add `?format=table` for ASCII table) |
-| `/v1/messages` | POST | Anthropic Messages API |
+| `/v1/messages` | POST | Anthropic Messages API (for Claude Code) |
+| `/v1/chat/completions` | POST | OpenAI Chat Completions API (for GitHub Copilot-compatible tools) |
 | `/v1/models` | GET | List available models |
 | `/refresh-token` | POST | Force token refresh |
 
@@ -278,13 +387,16 @@ npm test
 Individual tests:
 
 ```bash
-npm run test:signatures    # Thinking signatures
-npm run test:multiturn     # Multi-turn with tools
-npm run test:streaming     # Streaming SSE events
-npm run test:interleaved   # Interleaved thinking
-npm run test:images        # Image processing
-npm run test:caching       # Prompt caching
+npm run test:signatures       # Thinking signatures
+npm run test:multiturn        # Multi-turn with tools
+npm run test:streaming        # Streaming SSE events
+npm run test:interleaved      # Interleaved thinking
+npm run test:images           # Image processing
+npm run test:caching          # Prompt caching
+npm run test:chat-completions # OpenAI Chat Completions API
 ```
+
+> **Note:** Tests require at least one account to be configured (via `npm run accounts:add` or Antigravity app).
 
 ---
 
