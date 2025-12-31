@@ -4,9 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Antigravity Claude Proxy is a Node.js proxy server that exposes an Anthropic-compatible API backed by Antigravity's Cloud Code service. It enables using Claude models (`claude-sonnet-4-5-thinking`, `claude-opus-4-5-thinking`) and Gemini models (`gemini-3-flash`, `gemini-3-pro-low`, `gemini-3-pro-high`) with Claude Code CLI.
+Antigravity Claude Proxy is a Node.js proxy server that exposes both **Anthropic-compatible** and **OpenAI-compatible** APIs backed by Antigravity's Cloud Code service. It enables:
 
-The proxy translates requests from Anthropic Messages API format → Google Generative AI format → Antigravity Cloud Code API, then converts responses back to Anthropic format with full thinking/streaming support.
+1. Using Claude models (`claude-sonnet-4-5-thinking`, `claude-opus-4-5-thinking`) and Gemini models (`gemini-3-flash`, `gemini-3-pro-low`, `gemini-3-pro-high`) with **Claude Code CLI** via Anthropic Messages API
+2. Using the same models with **GitHub Copilot-compatible tools** via OpenAI Chat Completions API
+
+The proxy translates requests between formats:
+- **Anthropic Messages API** → Google Generative AI format → Antigravity Cloud Code API → Anthropic format
+- **OpenAI Chat Completions API** → Anthropic format → Google Generative AI format → Antigravity Cloud Code API → OpenAI format
 
 ## Commands
 
@@ -30,29 +35,31 @@ npm run accounts:verify  # Verify account tokens are valid
 npm test
 
 # Run individual tests
-npm run test:signatures    # Thinking signatures
-npm run test:multiturn     # Multi-turn with tools
-npm run test:streaming     # Streaming SSE events
-npm run test:interleaved   # Interleaved thinking
-npm run test:images        # Image processing
-npm run test:caching       # Prompt caching
+npm run test:signatures       # Thinking signatures
+npm run test:multiturn        # Multi-turn with tools
+npm run test:streaming        # Streaming SSE events
+npm run test:interleaved      # Interleaved thinking
+npm run test:images           # Image processing
+npm run test:caching          # Prompt caching
+npm run test:chat-completions # OpenAI Chat Completions API
 ```
 
 ## Architecture
 
 **Request Flow:**
 ```
-Claude Code CLI → Express Server (server.js) → CloudCode Client → Antigravity Cloud Code API
+Claude Code CLI / Copilot Tools → Express Server (server.js) → CloudCode Client → Antigravity Cloud Code API
 ```
 
 **Key Modules:**
 
-- **src/server.js**: Express server exposing Anthropic-compatible endpoints (`/v1/messages`, `/v1/models`, `/health`, `/account-limits`)
+- **src/server.js**: Express server exposing both Anthropic and OpenAI-compatible endpoints (`/v1/messages`, `/v1/chat/completions`, `/v1/models`, `/health`, `/account-limits`)
 - **src/cloudcode-client.js**: Makes requests to Antigravity Cloud Code API with retry/failover logic, handles both streaming and non-streaming
-- **src/format/**: Format conversion module (Anthropic ↔ Google Generative AI)
+- **src/format/**: Format conversion module (Anthropic ↔ Google Generative AI, OpenAI ↔ Anthropic)
   - `index.js` - Re-exports all converters
   - `request-converter.js` - Anthropic → Google request conversion
   - `response-converter.js` - Google → Anthropic response conversion
+  - `openai-converter.js` - OpenAI ↔ Anthropic format conversion (for GitHub Copilot compatibility)
   - `content-converter.js` - Message content and role conversion
   - `schema-sanitizer.js` - JSON Schema cleaning for Gemini API compatibility (preserves constraints/enums as hints)
   - `thinking-utils.js` - Thinking block validation, filtering, reordering, and recovery logic
