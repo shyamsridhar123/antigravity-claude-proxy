@@ -96,6 +96,32 @@ export const GEMINI_SKIP_SIGNATURE = 'skip_thought_signature_validator';
 export const GEMINI_SIGNATURE_CACHE_TTL_MS = 2 * 60 * 60 * 1000;
 
 /**
+ * Model aliases - maps simplified names to official Anthropic model IDs
+ * This allows using both `claude-opus-4-5-thinking` and `claude-opus-4-5-20251101`
+ */
+export const MODEL_ALIASES = {
+    // Claude Opus 4.5 variants
+    'claude-opus-4-5-thinking': 'claude-opus-4-5-20251101',
+    'claude-opus-4-5': 'claude-opus-4-5-20251101',
+    
+    // Claude Sonnet 4.5 variants
+    'claude-sonnet-4-5-thinking': 'claude-sonnet-4-5-20241022',
+    'claude-sonnet-4-5': 'claude-sonnet-4-5-20241022',
+};
+
+/**
+ * Resolve model name to official Anthropic/Gemini model ID
+ * @param {string} modelName - The model name from the request (may be alias)
+ * @returns {string} The official model ID to use with the API
+ */
+export function resolveModelName(modelName) {
+    if (!modelName) return modelName;
+    // Check if it's a known alias
+    const resolved = MODEL_ALIASES[modelName.toLowerCase()];
+    return resolved || modelName;
+}
+
+/**
  * Get the model family from model name (dynamic detection, no hardcoded list).
  * @param {string} modelName - The model name from the request
  * @returns {'claude' | 'gemini' | 'unknown'} The model family
@@ -114,8 +140,17 @@ export function getModelFamily(modelName) {
  */
 export function isThinkingModel(modelName) {
     const lower = (modelName || '').toLowerCase();
-    // Claude thinking models have "thinking" in the name
-    if (lower.includes('claude') && lower.includes('thinking')) return true;
+    
+    // Claude thinking models:
+    // - Have "thinking" in the name, OR
+    // - Are Opus/Sonnet 4.5+ models (with or without datestamps)
+    if (lower.includes('claude')) {
+        if (lower.includes('thinking')) return true;
+        // Check for Opus 4.5 or Sonnet 4.5 with optional datestamp
+        // Examples: claude-opus-4-5, claude-opus-4-5-20251101, claude-sonnet-4-5-20241022
+        if (/claude-(opus|sonnet)-4-[5-9]/.test(lower)) return true;
+    }
+    
     // Gemini thinking models: explicit "thinking" in name, OR gemini version 3+
     if (lower.includes('gemini')) {
         if (lower.includes('thinking')) return true;
@@ -123,6 +158,7 @@ export function isThinkingModel(modelName) {
         const versionMatch = lower.match(/gemini-(\d+)/);
         if (versionMatch && parseInt(versionMatch[1], 10) >= 3) return true;
     }
+    
     return false;
 }
 
@@ -162,6 +198,8 @@ export default {
     GEMINI_MAX_OUTPUT_TOKENS,
     GEMINI_SKIP_SIGNATURE,
     GEMINI_SIGNATURE_CACHE_TTL_MS,
+    MODEL_ALIASES,
+    resolveModelName,
     getModelFamily,
     isThinkingModel,
     OAUTH_CONFIG,

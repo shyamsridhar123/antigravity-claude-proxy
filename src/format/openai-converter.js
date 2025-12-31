@@ -32,12 +32,13 @@ export function convertOpenAIToAnthropic(openaiRequest) {
     }
 
     // Map OpenAI model names to our supported models
+    // Using official Anthropic model IDs with datestamps for better compatibility
     const modelMap = {
-        'gpt-4': 'claude-opus-4-5-thinking',
-        'gpt-4-turbo': 'claude-opus-4-5-thinking',
-        'gpt-4o': 'claude-opus-4-5-thinking',
-        'gpt-3.5-turbo': 'claude-sonnet-4-5-thinking',
-        'gpt-4o-mini': 'claude-sonnet-4-5',
+        'gpt-4': 'claude-opus-4-5-20251101',
+        'gpt-4-turbo': 'claude-opus-4-5-20251101',
+        'gpt-4o': 'claude-opus-4-5-20251101',
+        'gpt-3.5-turbo': 'claude-sonnet-4-5-20241022',
+        'gpt-4o-mini': 'claude-sonnet-4-5-20241022',
         // Gemini mappings
         'gemini-pro': 'gemini-3-pro-high',
         'gemini-flash': 'gemini-3-flash',
@@ -179,7 +180,7 @@ export function convertOpenAIToAnthropic(openaiRequest) {
 
     // Build Anthropic request
     const anthropicRequest = {
-        model: modelMap[model] || model || 'claude-sonnet-4-5-thinking',
+        model: modelMap[model] || model || 'claude-sonnet-4-5-20241022',
         messages: anthropicMessages,
         max_tokens: max_tokens || 4096,
         stream: stream || false

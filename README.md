@@ -146,10 +146,26 @@ Add this configuration:
   "env": {
     "ANTHROPIC_AUTH_TOKEN": "test",
     "ANTHROPIC_BASE_URL": "http://localhost:8080",
+    "ANTHROPIC_MODEL": "claude-opus-4-5-20251101",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-4-5-20251101",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-sonnet-4-5-20241022",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-sonnet-4-5-20241022",
+    "CLAUDE_CODE_SUBAGENT_MODEL": "claude-sonnet-4-5-20241022"
+  }
+}
+```
+
+**Using Aliases:** You can also use simplified aliases (both work the same):
+
+```json
+{
+  "env": {
+    "ANTHROPIC_AUTH_TOKEN": "test",
+    "ANTHROPIC_BASE_URL": "http://localhost:8080",
     "ANTHROPIC_MODEL": "claude-opus-4-5-thinking",
     "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-4-5-thinking",
     "ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-sonnet-4-5-thinking",
-    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-sonnet-4-5",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-sonnet-4-5-thinking",
     "CLAUDE_CODE_SUBAGENT_MODEL": "claude-sonnet-4-5-thinking"
   }
 }
@@ -250,7 +266,7 @@ client = openai.OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="gpt-4",  # Maps to claude-opus-4-5-thinking
+    model="gpt-4",  # Maps to claude-opus-4-5-20251101 (Opus 4.5 with thinking)
     messages=[
         {"role": "user", "content": "Hello!"}
     ]
@@ -278,13 +294,17 @@ OpenAI model names are automatically mapped to Claude/Gemini models:
 
 | OpenAI Model | Maps To |
 |--------------|---------|
-| `gpt-4`, `gpt-4-turbo`, `gpt-4o` | `claude-opus-4-5-thinking` |
-| `gpt-3.5-turbo` | `claude-sonnet-4-5-thinking` |
-| `gpt-4o-mini` | `claude-sonnet-4-5` |
+| `gpt-4`, `gpt-4-turbo`, `gpt-4o` | `claude-opus-4-5-20251101` (Opus 4.5 with extended thinking) |
+| `gpt-3.5-turbo` | `claude-sonnet-4-5-20241022` (Sonnet 4.5 with extended thinking) |
+| `gpt-4o-mini` | `claude-sonnet-4-5-20241022` (Sonnet 4.5 with extended thinking) |
 | `gemini-pro` | `gemini-3-pro-high` |
 | `gemini-flash` | `gemini-3-flash` |
 
-You can also use the actual model names directly (e.g., `claude-sonnet-4-5-thinking`).
+You can also use the actual model names directly (e.g., `claude-opus-4-5-20251101`, `claude-sonnet-4-5-20241022`).
+
+**Model Aliases:** The proxy supports simplified aliases for convenience:
+- `claude-opus-4-5-thinking` or `claude-opus-4-5` → `claude-opus-4-5-20251101`
+- `claude-sonnet-4-5-thinking` or `claude-sonnet-4-5` → `claude-sonnet-4-5-20241022`
 
 ### Demo
 
@@ -323,11 +343,12 @@ claude
 
 ### Claude Models
 
-| Model ID | Description |
-|----------|-------------|
-| `claude-sonnet-4-5-thinking` | Claude Sonnet 4.5 with extended thinking |
-| `claude-opus-4-5-thinking` | Claude Opus 4.5 with extended thinking |
-| `claude-sonnet-4-5` | Claude Sonnet 4.5 without thinking |
+| Model ID | Alias | Description |
+|----------|-------|-------------|
+| `claude-opus-4-5-20251101` | `claude-opus-4-5-thinking`, `claude-opus-4-5` | Claude Opus 4.5 with extended thinking (latest release) |
+| `claude-sonnet-4-5-20241022` | `claude-sonnet-4-5-thinking`, `claude-sonnet-4-5` | Claude Sonnet 4.5 with extended thinking |
+
+**Note:** All Claude 4.5 models support extended thinking mode automatically. You can use either the official model ID (with datestamp) or the simplified alias.
 
 ### Gemini Models
 

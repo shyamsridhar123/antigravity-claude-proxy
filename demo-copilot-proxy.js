@@ -114,7 +114,7 @@ async function demo() {
     
     try {
         const response = await chatCompletions({
-            model: 'gpt-4',  // Maps to claude-opus-4-5-thinking
+            model: 'gpt-4',  // Maps to claude-opus-4-5-20251101 (Opus 4.5 with thinking)
             messages: [
                 { role: 'user', content: 'Say "Hello from GitHub Copilot Proxy!" in a friendly way.' }
             ],
@@ -145,7 +145,7 @@ async function demo() {
     
     try {
         const chunks = await chatCompletionsStream({
-            model: 'gpt-3.5-turbo',  // Maps to claude-sonnet-4-5-thinking
+            model: 'gpt-3.5-turbo',  // Maps to claude-sonnet-4-5-20241022
             messages: [
                 { role: 'user', content: 'Count from 1 to 5, one number per line.' }
             ],

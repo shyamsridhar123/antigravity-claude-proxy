@@ -17,7 +17,8 @@ import {
     MAX_WAIT_BEFORE_ERROR_MS,
     MIN_SIGNATURE_LENGTH,
     getModelFamily,
-    isThinkingModel
+    isThinkingModel,
+    resolveModelName
 } from './constants.js';
 import {
     convertAnthropicToGoogle,
@@ -220,7 +221,8 @@ function parseResetTime(responseOrError, errorText = '') {
  * Build the wrapped request body for Cloud Code API
  */
 function buildCloudCodeRequest(anthropicRequest, projectId) {
-    const model = anthropicRequest.model;
+    // Resolve model alias to official name (e.g., claude-opus-4-5-thinking -> claude-opus-4-5-20251101)
+    const model = resolveModelName(anthropicRequest.model);
     const googleRequest = convertAnthropicToGoogle(anthropicRequest);
 
     // Use stable session ID derived from first user message for cache continuity
