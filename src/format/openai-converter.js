@@ -23,6 +23,14 @@ export function convertOpenAIToAnthropic(openaiRequest) {
         ...otherParams
     } = openaiRequest;
 
+    // Validate messages array
+    if (!messages || !Array.isArray(messages)) {
+        throw new Error('messages must be an array');
+    }
+    if (messages.length === 0) {
+        throw new Error('messages array cannot be empty');
+    }
+
     // Map OpenAI model names to our supported models
     const modelMap = {
         'gpt-4': 'claude-opus-4-5-thinking',
