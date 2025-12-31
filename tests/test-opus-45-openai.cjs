@@ -194,8 +194,20 @@ async function runTests() {
         console.log('  Message content:', content.substring(0, 150) + (content.length > 150 ? '...' : ''));
         console.log('  Content length:', content.length, 'chars');
 
-        // Check if response shows reasoning (should be more than just "60 mph")
-        const hasReasoning = content.length > 50;
+        // Check if response shows reasoning by looking for:
+        // 1. Reasonable length (more than a terse answer)
+        // 2. Mathematical operations or reasoning keywords
+        const hasGoodLength = content.length > 50;
+        const lowerContent = content.toLowerCase();
+        const hasReasoningIndicators = 
+            lowerContent.includes('divided') || 
+            lowerContent.includes('120') || 
+            lowerContent.includes('miles') ||
+            lowerContent.includes('hours') ||
+            lowerContent.includes('speed') ||
+            lowerContent.includes('=') ||
+            content.includes('/');
+        const hasReasoning = hasGoodLength && hasReasoningIndicators;
 
         if (response.statusCode === 200 && hasReasoning) {
             console.log('  ✓ PASSED - Response shows reasoning');

@@ -146,8 +146,9 @@ export function isThinkingModel(modelName) {
     // - Are Opus/Sonnet 4.5+ models (with or without datestamps)
     if (lower.includes('claude')) {
         if (lower.includes('thinking')) return true;
-        // Check for Opus 4.5 or Sonnet 4.5 with optional datestamp
-        // Examples: claude-opus-4-5, claude-opus-4-5-20251101, claude-sonnet-4-5-20241022
+        // Check for Opus 4.5+ or Sonnet 4.5+ with optional datestamp
+        // Pattern matches: claude-opus-4-5, claude-opus-4-6, claude-sonnet-4-5-20241022, etc.
+        // The [5-9] range allows for future 4.6, 4.7, etc. versions
         if (/claude-(opus|sonnet)-4-[5-9]/.test(lower)) return true;
     }
     
