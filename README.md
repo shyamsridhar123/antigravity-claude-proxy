@@ -286,6 +286,25 @@ OpenAI model names are automatically mapped to Claude/Gemini models:
 
 You can also use the actual model names directly (e.g., `claude-sonnet-4-5-thinking`).
 
+### Demo
+
+Run the included demo script to see the proxy in action:
+
+```bash
+# Start the proxy server
+npm start
+
+# In another terminal, run the demo
+node demo-copilot-proxy.js
+```
+
+The demo shows:
+1. Simple non-streaming completion
+2. Streaming completion with real-time output
+3. Function/tool calling
+
+---
+
 ### Run Claude Code
 
 ```bash
