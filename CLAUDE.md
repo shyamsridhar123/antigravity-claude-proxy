@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Antigravity Claude Proxy is a Node.js proxy server that exposes both **Anthropic-compatible** and **OpenAI-compatible** APIs backed by Antigravity's Cloud Code service. It enables:
 
-1. Using Claude models (`claude-sonnet-4-5-thinking`, `claude-opus-4-5-thinking`) and Gemini models (`gemini-3-flash`, `gemini-3-pro-low`, `gemini-3-pro-high`) with **Claude Code CLI** via Anthropic Messages API
+1. Using Claude models (`claude-opus-4-5-20251101`, `claude-sonnet-4-5-20241022` or their aliases) and Gemini models (`gemini-3-flash`, `gemini-3-pro-low`, `gemini-3-pro-high`) with **Claude Code CLI** via Anthropic Messages API
 2. Using the same models with **GitHub Copilot-compatible tools** via OpenAI Chat Completions API
 
 The proxy translates requests between formats:

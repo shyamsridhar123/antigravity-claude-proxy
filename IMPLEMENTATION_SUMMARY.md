@@ -36,11 +36,15 @@ Format converter module that handles bidirectional conversion between OpenAI and
   - Maintains error message fidelity
 
 **Model Mappings:**
-- gpt-4, gpt-4-turbo, gpt-4o → claude-opus-4-5-thinking
-- gpt-3.5-turbo → claude-sonnet-4-5-thinking
-- gpt-4o-mini → claude-sonnet-4-5
+- gpt-4, gpt-4-turbo, gpt-4o → claude-opus-4-5-20251101 (Opus 4.5 with extended thinking)
+- gpt-3.5-turbo → claude-sonnet-4-5-20241022 (Sonnet 4.5 with extended thinking)
+- gpt-4o-mini → claude-sonnet-4-5-20241022 (Sonnet 4.5 with extended thinking)
 - gemini-pro → gemini-3-pro-high
 - gemini-flash → gemini-3-flash
+
+**Model Aliases:** Simplified aliases are supported for backward compatibility:
+- claude-opus-4-5-thinking, claude-opus-4-5 → claude-opus-4-5-20251101
+- claude-sonnet-4-5-thinking, claude-sonnet-4-5 → claude-sonnet-4-5-20241022
 
 #### `tests/test-chat-completions.cjs` (10KB)
 Comprehensive test suite for the chat completions endpoint:

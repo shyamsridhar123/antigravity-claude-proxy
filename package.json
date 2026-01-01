@@ -26,7 +26,9 @@
     "test:interleaved": "node tests/test-interleaved-thinking.cjs",
     "test:images": "node tests/test-images.cjs",
     "test:caching": "node tests/test-caching-streaming.cjs",
-    "test:chat-completions": "node tests/test-chat-completions.cjs"
+    "test:chat-completions": "node tests/test-chat-completions.cjs",
+    "test:model-aliases": "node tests/test-model-aliases.cjs",
+    "test:opus-45": "node tests/test-opus-45-openai.cjs"
   },
   "keywords": [
     "claude",
