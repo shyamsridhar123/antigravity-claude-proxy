@@ -15,7 +15,7 @@ antigravity-claude-proxy start
 npx antigravity-claude-proxy start
 
 # Or clone and run locally
-git clone https://github.com/badri-s2001/antigravity-claude-proxy
+git clone https://github.com/shyamsridhar123/antigravity-claude-proxy
 cd antigravity-claude-proxy
 npm install
 npm start
@@ -228,5 +228,5 @@ npm run test:chat-completions
 
 - [Anthropic Claude Documentation](https://docs.anthropic.com/)
 - [OpenAI API Reference](https://platform.openai.com/docs/api-reference)
-- [Proxy GitHub Repository](https://github.com/badri-s2001/antigravity-claude-proxy)
-- [Report Issues](https://github.com/badri-s2001/antigravity-claude-proxy/issues)
+- [Proxy GitHub Repository](https://github.com/shyamsridhar123/antigravity-claude-proxy)
+- [Report Issues](https://github.com/shyamsridhar123/antigravity-claude-proxy/issues)

@@ -54,7 +54,7 @@ antigravity-claude-proxy start
 ### Option 2: Clone Repository
 
 ```bash
-git clone https://github.com/badri-s2001/antigravity-claude-proxy.git
+git clone https://github.com/shyamsridhar123/antigravity-claude-proxy.git
 cd antigravity-claude-proxy
 npm install
 npm start
@@ -518,4 +518,4 @@ MIT
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=badri-s2001/antigravity-claude-proxy&type=date&legend=top-left&cache-control=no-cache)](https://www.star-history.com/#badri-s2001/antigravity-claude-proxy&type=date&legend=top-left)
+[![Star History Chart](https://api.star-history.com/svg?repos=shyamsridhar123/antigravity-claude-proxy&type=date&legend=top-left&cache-control=no-cache)](https://www.star-history.com/#shyamsridhar123/antigravity-claude-proxy&type=date&legend=top-left)
